@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-based system design workspace for diagrams, HLDs, LLDs, and architecture flows">
+    <title>DiagramMaker AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.4/cytoscape.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="chat-panel" id="chatPanel">
+            <div class="panel-header">
+                <div class="header-left">
+                    <div class="header-icon pulse-glow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="header-title">Assistant</h1>
+                        <span class="header-subtitle" id="connectionStatus" style="color:#4a4540">Offline</span>
+                    </div>
+                </div>
+                <button class="icon-btn" id="clearChatBtn" title="Clear chat">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message animate-in">
+                    <div class="message-avatar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            <p>Welcome to <strong>DiagramMaker</strong>.</p>
+                            <p>I can help you shape system designs, flowcharts, HLDs, and LLDs. Start by describing the product or platform you want to design.</p>
+                        </div>
+                        <span class="message-time">now</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar small">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+
+            <div class="chat-input-bar">
+                <textarea id="chatInput" placeholder="Describe the system you want to build..." rows="1" maxlength="4000"></textarea>
+                <button class="send-btn" id="sendBtn" title="Send">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <main class="canvas-panel" id="canvasPanel">
+            <div class="canvas-toolbar" id="canvasToolbar">
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="addNodeBtn" title="Add Node">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        <span>Add</span>
+                    </button>
+                    <button class="toolbar-btn" id="addEdgeBtn" title="Connect">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                        <span>Connect</span>
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <button class="toolbar-btn" id="deleteSelectedBtn" title="Delete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span>Delete</span>
+                    </button>
+                </div>
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="zoomInBtn" title="Zoom In">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" id="zoomOutBtn" title="Zoom Out">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" id="fitBtn" title="Fit">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="cy" class="canvas-container"></div>
+
+            <div class="canvas-info-bar" id="canvasInfoBar">
+                <span id="nodeCount">Nodes: 0</span>
+                <span class="info-divider">|</span>
+                <span id="edgeCount">Edges: 0</span>
+                <span class="info-divider">|</span>
+                <span id="zoomLevel">Zoom: 100%</span>
+            </div>
+        </main>
+
+        <aside class="settings-panel" id="settingsPanel">
+            <div class="panel-header">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="header-title">Settings</h2>
+                </div>
+                <button class="icon-btn" id="collapseSettingsBtn" title="Collapse">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="settings-content">
+                <div class="settings-section">
+                    <div class="section-header" data-section="canvas">
+                        <span>Canvas</span>
+                        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="section-body open" data-body="canvas">
+                        <div class="setting-row"><label for="gridToggle">Grid</label><label class="toggle-switch"><input type="checkbox" id="gridToggle" checked><span class="toggle-slider"></span></label></div>
+                        <div class="setting-row"><label for="snapToggle">Snap</label><label class="toggle-switch"><input type="checkbox" id="snapToggle"><span class="toggle-slider"></span></label></div>
+                        <div class="setting-row"><label for="minimapToggle">Minimap</label><label class="toggle-switch"><input type="checkbox" id="minimapToggle"><span class="toggle-slider"></span></label></div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-header" data-section="nodes">
+                        <span>Node Style</span>
+                        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="section-body open" data-body="nodes">
+                        <div class="setting-row"><label for="nodeColor">Color</label><input type="color" id="nodeColor" value="#c4a882" class="color-picker"></div>
+                        <div class="setting-row"><label for="nodeShape">Shape</label><select id="nodeShape" class="setting-select"><option value="roundrectangle">Rounded</option><option value="ellipse">Ellipse</option><option value="diamond">Diamond</option><option value="hexagon">Hexagon</option></select></div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-header" data-section="actions">
+                        <span>Actions</span>
+                        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="section-body open" data-body="actions">
+                        <button class="settings-btn primary" id="autoLayoutBtn">Auto Layout</button>
+                        <button class="settings-btn" id="exportJsonBtn">Export JSON</button>
+                        <button class="settings-btn danger" id="clearCanvasBtn">Clear Canvas</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-header" data-section="about">
+                        <span>About</span>
+                        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="section-body" data-body="about">
+                        <div class="about-info">
+                            <p class="about-name">DiagramMaker AI</p>
+                            <p class="about-version">v1.0 | Foundation</p>
+                            <p class="about-desc">AI-powered system design workspace built on Vite, FastAPI, and Gemini.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script type="module" src="/src/app/main.js"></script>
+</body>
+</html>

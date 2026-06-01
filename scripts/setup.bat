@@ -1,0 +1,19 @@
+@echo off
+echo Starting DiagramMaker Setup...
+
+echo.
+echo Installing Backend Dependencies...
+cd backend
+python -m pip install -r requirements.txt
+cd ..
+
+echo.
+echo Installing Frontend Dependencies...
+cd frontend
+call npm install
+cd ..
+
+echo.
+echo Setup Complete!
+echo Next steps: Add your GEMINI_API_KEY to backend/.env and run scripts\start.bat
+pause

@@ -1,0 +1,43 @@
+:root {
+    --black-pure: #050505;
+    --black-deep: #0a0a0a;
+    --black-rich: #0e0e0e;
+    --black-soft: #141414;
+    --black-elevated: #1a1a1a;
+    --black-hover: #1f1f1f;
+    --black-active: #252525;
+
+    --border-ghost: rgba(255,255,255,0.04);
+    --border-subtle: rgba(255,255,255,0.07);
+    --border-visible: rgba(255,255,255,0.1);
+    --border-accent: rgba(196,168,130,0.2);
+
+    --gold: #c4a882;
+    --gold-dim: #8b7355;
+    --gold-glow: rgba(196,168,130,0.08);
+    --gold-glow-md: rgba(196,168,130,0.12);
+    --gold-glow-lg: rgba(196,168,130,0.18);
+    --steel: #5a6a7a;
+    --ember: #7a4a3a;
+
+    --text-primary: #e8e4df;
+    --text-secondary: #7a756e;
+    --text-muted: #4a4540;
+    --text-ghost: #2e2b28;
+
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+    --chat-w: 310px;
+    --settings-w: 260px;
+    --header-h: 52px;
+    --toolbar-h: 42px;
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+}
