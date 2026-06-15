@@ -120,10 +120,52 @@
                             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
                         </svg>
                     </button>
+
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Canvas / Code View Toggle -->
+                    <div class="view-toggle" id="viewToggle">
+                        <button class="view-toggle-btn active" id="viewCanvasBtn" title="Canvas View">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Canvas</span>
+                        </button>
+                        <button class="view-toggle-btn" id="viewCodeBtn" title="JSON Code View">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                            <span>Code</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div id="cy" class="canvas-container"></div>
+            <div class="canvas-view-wrapper">
+                <div id="cy" class="canvas-container"></div>
+                <div id="codeEditorPanel" class="code-editor-panel" style="display:none;">
+                    <div class="code-editor-header">
+                        <span class="code-editor-label">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            diagram.json
+                        </span>
+                        <button class="code-apply-btn" id="applyCodeBtn" title="Apply changes to canvas">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Apply
+                        </button>
+                    </div>
+                    <textarea id="codeEditor" class="code-editor" spellcheck="false" wrap="off"></textarea>
+                </div>
+            </div>
 
             <div class="canvas-info-bar" id="canvasInfoBar">
                 <span id="nodeCount">Nodes: 0</span>
@@ -197,7 +239,7 @@
                         <div class="about-info">
                             <p class="about-name">DiagramMaker AI</p>
                             <p class="about-version">v1.0 | Foundation</p>
-                            <p class="about-desc">AI-powered system design workspace built on Vite, FastAPI, and Gemini.</p>
+                            <p class="about-desc">AI-powered system design workspace built on Vite, FastAPI, and Groq.</p>
                         </div>
                     </div>
                 </div>

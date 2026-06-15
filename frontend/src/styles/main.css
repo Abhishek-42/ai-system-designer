@@ -454,6 +454,156 @@ body {
 .info-divider { opacity: 0.2; }
 
 /* ================================================================
+   CANVAS / CODE VIEW TOGGLE
+   ================================================================ */
+.canvas-view-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    min-height: 0;
+}
+
+.canvas-view-wrapper > .canvas-container {
+    flex: 1;
+    position: relative;
+    background: var(--black-pure);
+    transition: opacity 0.25s var(--ease-out);
+}
+
+/* View Toggle Pill */
+.view-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--black-rich);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.view-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+
+.view-toggle-btn:hover {
+    color: var(--text-secondary);
+}
+
+.view-toggle-btn.active {
+    background: var(--gold-glow-md);
+    color: var(--gold);
+    box-shadow: 0 0 8px rgba(196,168,130,0.06);
+}
+
+/* Code Editor Panel */
+.code-editor-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--black-pure);
+    z-index: 4;
+    animation: codeIn 0.2s var(--ease-out);
+}
+
+@keyframes codeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.code-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    background: var(--black-deep);
+    border-bottom: 1px solid var(--border-ghost);
+    flex-shrink: 0;
+}
+
+.code-editor-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+}
+
+.code-editor-label svg {
+    color: var(--gold-dim);
+}
+
+.code-apply-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-accent);
+    background: var(--gold-glow);
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    letter-spacing: 0.01em;
+}
+
+.code-apply-btn:hover {
+    background: var(--gold-glow-md);
+    box-shadow: 0 0 12px rgba(196,168,130,0.08);
+    transform: translateY(-1px);
+}
+
+.code-apply-btn:active {
+    transform: translateY(0) scale(0.96);
+    transition: transform 0.06s;
+}
+
+.code-editor {
+    flex: 1;
+    width: 100%;
+    padding: 16px 18px;
+    background: var(--black-pure);
+    color: var(--text-primary);
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.65;
+    tab-size: 2;
+    letter-spacing: 0.01em;
+    overflow: auto;
+}
+
+.code-editor::placeholder {
+    color: var(--text-ghost);
+}
+
+.code-editor::selection {
+    background: rgba(196,168,130,0.2);
+}
+
+/* ================================================================
    SETTINGS PANEL
    ================================================================ */
 .settings-panel {

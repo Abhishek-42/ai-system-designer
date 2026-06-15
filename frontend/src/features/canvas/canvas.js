@@ -20,7 +20,7 @@ const FALLBACK_DOCUMENT = {
     ]
 };
 
-function normalizeNode(node) {
+export function normalizeNode(node) {
     return {
         data: {
             id: node.id,
@@ -31,7 +31,7 @@ function normalizeNode(node) {
     };
 }
 
-function normalizeEdge(edge) {
+export function normalizeEdge(edge) {
     return {
         data: {
             id: edge.id,
@@ -42,7 +42,7 @@ function normalizeEdge(edge) {
     };
 }
 
-function updateCounters(document) {
+export function updateCounters(document) {
     const nodeNumbers = document.nodes
         .map(node => Number.parseInt(node.id.replace(/^n/, ''), 10))
         .filter(Number.isFinite);
@@ -54,7 +54,7 @@ function updateCounters(document) {
     edgeIdCounter = edgeNumbers.length ? Math.max(...edgeNumbers) : 0;
 }
 
-function updateInfo() {
+export function updateInfo() {
     if (!cyInstance) {
         return;
     }
@@ -423,5 +423,103 @@ export function setupCanvas() {
             });
         });
         document.getElementById('fitBtn').addEventListener('click', () => cyInstance.fit(null, 50));
+
+        // ── Canvas / Code View Toggle ──
+        const viewCanvasBtn = document.getElementById('viewCanvasBtn');
+        const viewCodeBtn = document.getElementById('viewCodeBtn');
+        const codeEditorPanel = document.getElementById('codeEditorPanel');
+        const codeEditor = document.getElementById('codeEditor');
+        const applyCodeBtn = document.getElementById('applyCodeBtn');
+        const canvasEl = document.getElementById('cy');
+
+        function serializeToJson() {
+            if (!cyInstance) return '{}';
+            const nodes = cyInstance.nodes().map(n => ({
+                id: n.id(),
+                data: { label: n.data('label'), kind: n.data('kind') || 'service' },
+                position: { x: Math.round(n.position('x')), y: Math.round(n.position('y')) }
+            }));
+            const edges = cyInstance.edges().map(e => ({
+                id: e.id(),
+                source: e.source().id(),
+                target: e.target().id(),
+                data: { label: e.data('label') || null }
+            }));
+            return JSON.stringify({ nodes, edges }, null, 2);
+        }
+
+        function switchToCanvas() {
+            viewCanvasBtn.classList.add('active');
+            viewCodeBtn.classList.remove('active');
+            codeEditorPanel.style.display = 'none';
+            canvasEl.style.display = '';
+            cyInstance.resize();
+            cyInstance.fit(null, 50);
+        }
+
+        function switchToCode() {
+            viewCodeBtn.classList.add('active');
+            viewCanvasBtn.classList.remove('active');
+            codeEditor.value = serializeToJson();
+            canvasEl.style.display = 'none';
+            codeEditorPanel.style.display = 'flex';
+        }
+
+        if (viewCanvasBtn) viewCanvasBtn.addEventListener('click', switchToCanvas);
+        if (viewCodeBtn) viewCodeBtn.addEventListener('click', switchToCode);
+
+        // Apply edited JSON back to canvas
+        if (applyCodeBtn) {
+            applyCodeBtn.addEventListener('click', async () => {
+                let parsed;
+                try {
+                    parsed = JSON.parse(codeEditor.value);
+                } catch (err) {
+                    showToast('Invalid JSON: ' + err.message);
+                    return;
+                }
+
+                if (!parsed.nodes || !parsed.edges) {
+                    showToast('JSON must have "nodes" and "edges" arrays');
+                    return;
+                }
+
+                try {
+                    // Clear current diagram and rebuild from JSON
+                    await applyDesignOperations([{ type: 'clear_diagram' }]);
+                    cyInstance.elements().remove();
+
+                    const addOps = [
+                        ...parsed.nodes.map(n => ({ type: 'add_node', node: n })),
+                        ...parsed.edges.map(e => ({ type: 'add_edge', edge: e }))
+                    ];
+                    await applyDesignOperations(addOps);
+
+                    parsed.nodes.forEach(n => cyInstance.add(normalizeNode(n)));
+                    parsed.edges.forEach(e => cyInstance.add(normalizeEdge(e)));
+
+                    updateCounters(parsed);
+                    updateInfo();
+
+                    showToast('Code applied to canvas');
+                    switchToCanvas();
+                } catch (err) {
+                    showToast('Apply failed: ' + err.message);
+                }
+            });
+        }
+
+        // Tab key support in code editor
+        if (codeEditor) {
+            codeEditor.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = codeEditor.selectionStart;
+                    const end = codeEditor.selectionEnd;
+                    codeEditor.value = codeEditor.value.substring(0, start) + '  ' + codeEditor.value.substring(end);
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start + 2;
+                }
+            });
+        }
     });
 }

@@ -1,0 +1,620 @@
+# DiagramMaker AI — System Architecture Deep Dive
+
+---
+
+## 1. High-Level System Architecture
+
+This is the bird's-eye view of the entire system. Three independent processes collaborate over HTTP:
+
+```mermaid
+graph TB
+    subgraph USER["👤 User Browser"]
+        UI["Vite Frontend<br/>:5173"]
+    end
+
+    subgraph BACKEND["⚙️ FastAPI Backend :8001"]
+        API["/api Router"]
+        CHAT_SVC["ChatService"]
+        DESIGN_SVC["DesignService"]
+        REPO["DesignRepository"]
+    end
+
+    subgraph EXTERNAL["☁️ External Services"]
+        GEMINI["Google Gemini 2.5 Flash"]
+    end
+
+    subgraph STORAGE["💾 Persistence"]
+        JSON_FILE["data/project_design.json"]
+    end
+
+    UI -- "POST /api/chat" --> API
+    UI -- "GET /api/design/state" --> API
+    UI -- "POST /api/design/operations" --> API
+    UI -- "GET /api/health" --> API
+
+    API --> CHAT_SVC
+    API --> DESIGN_SVC
+    CHAT_SVC -- "Gemini SDK" --> GEMINI
+    DESIGN_SVC --> REPO
+    REPO -- "Read/Write JSON" --> JSON_FILE
+
+    style USER fill:#1a1a2e,stroke:#c4a882,color:#e8e4df
+    style BACKEND fill:#16213e,stroke:#c4a882,color:#e8e4df
+    style EXTERNAL fill:#0f3460,stroke:#c4a882,color:#e8e4df
+    style STORAGE fill:#1a1a2e,stroke:#c4a882,color:#e8e4df
+```
+
+### How It Works
+
+The system is a **two-service architecture** (frontend + backend) with one external dependency (Gemini API):
+
+| Component | Technology | Port | Responsibility |
+|-----------|-----------|------|----------------|
+| **Frontend** | Vite + Vanilla JS + Cytoscape.js | `5173` | Renders the 3-panel UI (chat, canvas, settings), manages user interactions, sends HTTP requests to backend |
+| **Backend** | FastAPI + Pydantic + Uvicorn | `8001` | Serves 4 API endpoints, validates all design mutations, persists state, proxies AI chat to Gemini |
+| **Gemini API** | Google `gemini-2.5-flash` | Cloud | Provides system-design-focused AI responses via the `google-generativeai` SDK |
+| **Design State** | JSON file on disk | N/A | Single file (`data/project_design.json`) acting as the canonical source of truth for the diagram |
+
+> [!IMPORTANT]
+> **Core principle**: The **backend owns the design state**. The frontend and AI never directly mutate the design document. They send validated operations to the backend, which applies them against a canonical document.
+
+---
+
+## 2. Backend Layered Architecture
+
+The backend follows a **clean-architecture / layered** pattern with 5 distinct layers:
+
+```mermaid
+graph TD
+    subgraph DELIVERY["Delivery Layer (API Routes)"]
+        R_HEALTH["/api/health<br/>health.py"]
+        R_CHAT["/api/chat<br/>chat.py"]
+        R_DESIGN_GET["/api/design/state<br/>design.py"]
+        R_DESIGN_POST["/api/design/operations<br/>design.py"]
+    end
+
+    subgraph APPLICATION["Application Layer (Services)"]
+        SVC_CHAT["ChatService<br/>chat_service.py"]
+        SVC_DESIGN["DesignService<br/>design_service.py"]
+    end
+
+    subgraph DOMAIN["Domain Layer (Models)"]
+        M_CHAT["ChatRequest / ChatResponse<br/>ChatMessage"]
+        M_DESIGN["DiagramDocument / DiagramNode<br/>DiagramEdge / DiagramOperation<br/>ProjectContext"]
+    end
+
+    subgraph PERSISTENCE["Persistence Layer (Repositories)"]
+        REPO_DESIGN["DesignRepository<br/>design_repository.py"]
+    end
+
+    subgraph INFRA["Infrastructure Layer (Core)"]
+        CONFIG["Settings / Config<br/>config.py"]
+        MAIN["FastAPI App<br/>main.py"]
+    end
+
+    R_CHAT --> SVC_CHAT
+    R_DESIGN_GET --> SVC_DESIGN
+    R_DESIGN_POST --> SVC_DESIGN
+
+    SVC_CHAT --> M_CHAT
+    SVC_DESIGN --> M_DESIGN
+
+    SVC_DESIGN --> REPO_DESIGN
+    REPO_DESIGN --> M_DESIGN
+
+    SVC_CHAT --> CONFIG
+    MAIN --> CONFIG
+
+    style DELIVERY fill:#1e3a5f,stroke:#c4a882,color:#e8e4df
+    style APPLICATION fill:#1a3050,stroke:#c4a882,color:#e8e4df
+    style DOMAIN fill:#162540,stroke:#c4a882,color:#e8e4df
+    style PERSISTENCE fill:#121e30,stroke:#c4a882,color:#e8e4df
+    style INFRA fill:#0e1820,stroke:#c4a882,color:#e8e4df
+```
+
+### Layer-by-Layer Breakdown
+
+#### Layer 1: Infrastructure — [main.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/main.py) + [config.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/core/config.py)
+
+- Creates the `FastAPI` app instance with project metadata
+- Configures **CORS middleware** so the Vite dev server at `:5173` can call the API at `:8001`
+- Loads environment variables via `dotenv` (specifically `GEMINI_API_KEY`)
+- Mounts the unified `api_router` under the `/api` prefix
+
+#### Layer 2: Delivery — [router.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/api/router.py) + Routes
+
+The router aggregates 3 route modules into one `APIRouter`:
+
+| Route | Method | Handler | Purpose |
+|-------|--------|---------|---------|
+| `/api/health` | GET | [health.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/api/routes/health.py) | Returns service status + whether Gemini key is configured |
+| `/api/chat` | POST | [chat.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/api/routes/chat.py) | Accepts user message + history, returns AI response |
+| `/api/design/state` | GET | [design.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/api/routes/design.py) | Returns the full design document (nodes, edges, project context) |
+| `/api/design/operations` | POST | [design.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/api/routes/design.py) | Applies a batch of validated operations to the design document |
+
+#### Layer 3: Application — [chat_service.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/services/chat_service.py) + [design_service.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/services/design_service.py)
+
+**ChatService**: Configures `gemini-2.5-flash` with a system design prompt, builds chat history from the frontend's conversation log, and returns the model's response. Gracefully degrades with an error message if the API key is missing.
+
+**DesignService**: The heart of the system. It processes a list of `DiagramOperation` objects sequentially, applying each against the in-memory document. It validates constraints (unique IDs, existing nodes for edges), increments the version counter, and persists via the repository.
+
+#### Layer 4: Domain — [chat/models.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/domain/chat/models.py) + [design/models.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/domain/design/models.py)
+
+All data contracts are Pydantic `BaseModel` classes with strict validation. The `DiagramOperation` model uses a `@model_validator` to ensure each operation type carries its required payload.
+
+#### Layer 5: Persistence — [design_repository.py](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/backend/app/repositories/design_repository.py)
+
+Reads/writes the design document as JSON to `data/project_design.json`. Creates a default starter document if the file doesn't exist.
+
+---
+
+## 3. Domain Model Hierarchy
+
+```mermaid
+classDiagram
+    class DiagramDocument {
+        +ProjectContext project
+        +List~DiagramNode~ nodes
+        +List~DiagramEdge~ edges
+        +int version
+        +str updated_at
+    }
+
+    class ProjectContext {
+        +str name
+        +str summary
+        +str design_type
+        +List~str~ assumptions
+        +List~str~ requirements
+    }
+
+    class DiagramNode {
+        +str id
+        +DiagramNodeData data
+        +DiagramNodePosition position
+    }
+
+    class DiagramNodeData {
+        +str label
+        +str kind
+        +Dict metadata
+    }
+
+    class DiagramNodePosition {
+        +float x
+        +float y
+    }
+
+    class DiagramEdge {
+        +str id
+        +str source
+        +str target
+        +DiagramEdgeData data
+    }
+
+    class DiagramEdgeData {
+        +str|None label
+        +Dict metadata
+    }
+
+    class DiagramOperation {
+        +str type
+        +DiagramNode|None node
+        +DiagramEdge|None edge
+        +str|None node_id
+        +str|None edge_id
+        +Dict updates
+        +ProjectContext|None project
+        +validate_payload()
+    }
+
+    class ApplyOperationsRequest {
+        +List~DiagramOperation~ operations
+    }
+
+    class ApplyOperationsResponse {
+        +DiagramDocument document
+        +int applied_operations
+    }
+
+    DiagramDocument *-- ProjectContext
+    DiagramDocument *-- DiagramNode
+    DiagramDocument *-- DiagramEdge
+    DiagramNode *-- DiagramNodeData
+    DiagramNode *-- DiagramNodePosition
+    DiagramEdge *-- DiagramEdgeData
+    ApplyOperationsRequest *-- DiagramOperation
+    ApplyOperationsResponse *-- DiagramDocument
+```
+
+### The 7 Operation Types
+
+| Operation | Required Fields | What It Does |
+|-----------|----------------|--------------|
+| `add_node` | `node` (full DiagramNode) | Validates ID uniqueness, appends node to document |
+| `update_node` | `node_id` + `updates` dict | Finds node by ID, patches label/kind/position/metadata |
+| `delete_node` | `node_id` | Removes node AND all connected edges (cascade delete) |
+| `add_edge` | `edge` (full DiagramEdge) | Validates edge ID uniqueness + both source/target nodes exist |
+| `delete_edge` | `edge_id` | Removes edge by ID |
+| `clear_diagram` | (none) | Empties both `nodes[]` and `edges[]` |
+| `set_project_context` | `project` | Replaces the entire project context |
+
+> [!NOTE]
+> Operations are applied **sequentially** in a single transaction. The version counter increments once per batch, not per operation. This means a single `POST /api/design/operations` with 5 operations produces one version bump.
+
+---
+
+## 4. Frontend Modular Architecture
+
+```mermaid
+graph TB
+    subgraph HTML["index.html (App Shell)"]
+        CHAT_PANEL["Chat Panel<br/>(aside#chatPanel)"]
+        CANVAS_PANEL["Canvas Panel<br/>(main#canvasPanel)"]
+        SETTINGS_PANEL["Settings Panel<br/>(aside#settingsPanel)"]
+    end
+
+    subgraph BOOTSTRAP["App Bootstrap"]
+        MAIN_JS["main.js<br/>DOMContentLoaded handler"]
+    end
+
+    subgraph FEATURES["Feature Modules"]
+        F_CHAT["chat.js<br/>setupChat()"]
+        F_CANVAS["canvas.js<br/>setupCanvas()"]
+        F_SETTINGS["settings.js<br/>setupSettings()"]
+    end
+
+    subgraph SHARED["Shared Utilities"]
+        API_CLIENT["apiClient.js<br/>4 HTTP functions"]
+        FORMATTERS["formatters.js<br/>escapeHtml, formatMarkdown,<br/>getTimestamp, showToast"]
+    end
+
+    subgraph CYTOSCAPE["Cytoscape.js (CDN)"]
+        CY_INSTANCE["cyInstance<br/>Graph rendering engine"]
+    end
+
+    MAIN_JS --> F_CHAT
+    MAIN_JS --> F_CANVAS
+    MAIN_JS --> F_SETTINGS
+
+    F_CHAT --> API_CLIENT
+    F_CHAT --> FORMATTERS
+    F_CANVAS --> API_CLIENT
+    F_CANVAS --> FORMATTERS
+    F_SETTINGS --> F_CANVAS
+    F_SETTINGS --> FORMATTERS
+
+    F_CANVAS --> CY_INSTANCE
+
+    style HTML fill:#1a1a2e,stroke:#c4a882,color:#e8e4df
+    style BOOTSTRAP fill:#16213e,stroke:#c4a882,color:#e8e4df
+    style FEATURES fill:#1e3a5f,stroke:#c4a882,color:#e8e4df
+    style SHARED fill:#1a3050,stroke:#c4a882,color:#e8e4df
+    style CYTOSCAPE fill:#0f3460,stroke:#c4a882,color:#e8e4df
+```
+
+### Frontend Module Details
+
+#### [main.js](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/frontend/src/app/main.js) — Bootstrap
+Waits for `DOMContentLoaded`, then initializes the 3 feature modules in order: Chat → Canvas → Settings. Also imports the global CSS.
+
+#### [canvas.js](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/frontend/src/features/canvas/canvas.js) — The Core Feature (~430 lines)
+- **On init**: Calls `GET /api/design/state` to load the backend document, falls back to a hardcoded `FALLBACK_DOCUMENT` on error
+- **Renders** nodes and edges into a Cytoscape.js graph with a preset layout
+- **Every mutation** (add node, delete node, add edge, update label, etc.) first calls `POST /api/design/operations`, then updates the local Cytoscape graph
+- **Supports**: right-click context menus, double-tap label editing, keyboard shortcuts (Delete, Ctrl+A), connect mode for drawing edges, zoom controls
+
+#### [chat.js](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/frontend/src/features/chat/chat.js) — AI Chat Panel
+- Maintains an in-memory `conversationHistory[]` array
+- On send: pushes user message, calls `POST /api/chat` with full history, renders AI response with markdown formatting
+- Checks backend health on startup to set connection status indicator
+
+#### [settings.js](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/frontend/src/features/settings/settings.js) — Configuration Panel
+- **Canvas toggles**: Grid overlay (CSS background-image), snap-to-grid (Cytoscape `free` event handler), minimap (placeholder)
+- **Node styling**: Live color picker and shape selector applied to Cytoscape styles
+- **Actions**: Auto-layout (grid algorithm), Export JSON, Clear Canvas (calls backend's `clear_diagram` operation)
+- **Accordion**: Collapsible sections via `section-header` / `section-body` toggling
+
+#### [apiClient.js](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/frontend/src/shared/api/apiClient.js) — HTTP Client
+4 exported functions wrapping `fetch()`:
+
+```
+checkBackendHealth()         → GET  /api/health
+sendChatMessage(msg, hist)   → POST /api/chat
+fetchDesignState()           → GET  /api/design/state
+applyDesignOperations(ops)   → POST /api/design/operations
+```
+
+All responses are parsed through a shared `parseJsonResponse()` that extracts error details from FastAPI's `HTTPException` format.
+
+#### [formatters.js](file:///d:/Worked/proj/B__Professonal__B/AI-based-Dia-maker/main_file/frontend/src/shared/utils/formatters.js) — Shared Utilities
+- `escapeHtml()` — XSS-safe text rendering
+- `formatMarkdown()` — Lightweight markdown→HTML (code blocks, bold, italic, lists)
+- `getTimestamp()` — HH:MM for chat messages
+- `showToast()` — Ephemeral notification system
+
+---
+
+## 5. Data Flow: Chat Conversation
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend (chat.js)
+    participant API as FastAPI (/api/chat)
+    participant SVC as ChatService
+    participant GEM as Gemini 2.5 Flash
+
+    U->>FE: Types message + hits Enter
+    FE->>FE: Render user bubble, push to history[]
+    FE->>FE: Show typing indicator
+
+    FE->>API: POST /api/chat<br/>{message, history[]}
+    API->>SVC: generate_response(ChatRequest)
+
+    SVC->>SVC: Build history with<br/>SYSTEM_DESIGN_PROMPT prefix
+    SVC->>GEM: start_chat(history) → send_message(msg)
+    GEM-->>SVC: AI response text
+
+    SVC-->>API: ChatResponse {response, timestamp}
+    API-->>FE: 200 JSON
+
+    FE->>FE: Hide typing indicator
+    FE->>FE: formatMarkdown(response)
+    FE->>FE: Render AI bubble, push to history[]
+    FE->>FE: Set status "Connected"
+
+    U->>U: Reads AI response
+```
+
+### Key Details
+
+1. **System Prompt**: The AI is primed with a `SYSTEM_DESIGN_PROMPT` that instructs it to behave as a "senior software architect" focused on HLDs, LLDs, flowcharts, and architecture diagrams
+2. **History Management**: The frontend maintains `conversationHistory[]` in memory. On each request, it sends the entire history (minus the current message) so Gemini has full context
+3. **Graceful Degradation**: If `GEMINI_API_KEY` is not set, the service returns a helpful error message with setup instructions instead of crashing
+4. **No Canvas Mutation**: The chat currently does NOT modify the canvas. It only provides architectural guidance. The user manually acts on suggestions
+
+---
+
+## 6. Data Flow: Design Operations (Backend-Synced Canvas)
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant CY as Cytoscape Canvas
+    participant FE as canvas.js
+    participant API as FastAPI (/api/design)
+    participant SVC as DesignService
+    participant REPO as DesignRepository
+    participant FILE as project_design.json
+
+    Note over U,FILE: === Initial Load ===
+    FE->>API: GET /api/design/state
+    API->>SVC: load_document()
+    SVC->>REPO: load()
+    REPO->>FILE: Read JSON
+    FILE-->>REPO: Raw JSON
+    REPO-->>SVC: DiagramDocument (validated)
+    SVC-->>API: DiagramDocument
+    API-->>FE: 200 JSON
+    FE->>CY: cytoscape({elements: [nodes, edges]})
+
+    Note over U,FILE: === User Adds a Node ===
+    U->>CY: Clicks "Add Node" button
+    CY->>FE: addNode(x, y)
+    FE->>API: POST /api/design/operations<br/>[{type: "add_node", node: {...}}]
+    API->>SVC: apply_operations(request)
+    SVC->>SVC: Validate unique ID
+    SVC->>SVC: Append node to document.nodes
+    SVC->>SVC: version++, update timestamp
+    SVC->>REPO: save(document)
+    REPO->>FILE: Write JSON
+    REPO-->>SVC: Saved document
+    SVC-->>API: ApplyOperationsResponse
+    API-->>FE: 200 JSON
+    FE->>CY: cy.add(normalizeNode(node))
+    FE->>U: showToast("Node added")
+
+    Note over U,FILE: === User Deletes a Node ===
+    U->>CY: Selects node + presses Delete
+    CY->>FE: deleteSelected()
+    FE->>API: POST /api/design/operations<br/>[{type: "delete_node", node_id: "n5"}]
+    API->>SVC: apply_operations(request)
+    SVC->>SVC: Verify node exists
+    SVC->>SVC: Remove node + CASCADE delete connected edges
+    SVC->>REPO: save(document)
+    REPO->>FILE: Write JSON
+    SVC-->>API: ApplyOperationsResponse
+    API-->>FE: 200 JSON
+    FE->>CY: cy.$(':selected').remove()
+    FE->>U: showToast("1 item(s) removed")
+```
+
+### Why This Pattern Matters
+
+> [!TIP]
+> This is an **optimistic update with backend validation** pattern:
+> 1. Frontend sends the operation to the backend **first**
+> 2. Backend validates (unique IDs, node existence, etc.)
+> 3. If valid → persists to JSON, returns success
+> 4. Frontend **then** updates the local Cytoscape graph
+> 5. If the backend rejects → the canvas stays unchanged, user sees an error toast
+>
+> This ensures the JSON file and the canvas are **always in sync**. The backend is the single source of truth.
+
+---
+
+## 7. UI Layout (Three-Panel Design)
+
+```mermaid
+graph LR
+    subgraph LAYOUT["Browser Viewport"]
+        direction LR
+        subgraph LEFT["Chat Panel (aside)"]
+            L1["Header: Assistant + Status"]
+            L2["Chat Messages Scroll Area"]
+            L3["Typing Indicator"]
+            L4["Input Bar + Send Button"]
+        end
+        subgraph CENTER["Canvas Panel (main)"]
+            C1["Toolbar: Add | Connect | Delete | Zoom"]
+            C2["Cytoscape.js Container (#cy)"]
+            C3["Info Bar: Nodes | Edges | Zoom%"]
+        end
+        subgraph RIGHT["Settings Panel (aside)"]
+            R1["Canvas: Grid / Snap / Minimap"]
+            R2["Node Style: Color / Shape"]
+            R3["Actions: Layout / Export / Clear"]
+            R4["About: Version Info"]
+        end
+    end
+
+    style LAYOUT fill:#0a0a14,stroke:#c4a882,color:#e8e4df
+    style LEFT fill:#111122,stroke:#c4a882,color:#e8e4df
+    style CENTER fill:#0d0d1a,stroke:#c4a882,color:#e8e4df
+    style RIGHT fill:#111122,stroke:#c4a882,color:#e8e4df
+```
+
+---
+
+## 8. Deployment Topology
+
+```mermaid
+graph TB
+    subgraph DEV["Local Development"]
+        VITE["Vite Dev Server<br/>npm run dev<br/>:5173"]
+        UVICORN["Uvicorn<br/>--reload<br/>:8001"]
+        ENV[".env file<br/>GEMINI_API_KEY"]
+    end
+
+    subgraph DOCKER["Docker Compose (Optional)"]
+        D_FE["node:18-alpine<br/>npm run dev :5173"]
+        D_BE["python:3.10-slim<br/>uvicorn :8001"]
+    end
+
+    subgraph SCRIPTS["Helper Scripts"]
+        SETUP["scripts/setup.bat<br/>pip install + npm install"]
+        START["scripts/start.bat<br/>Start both services"]
+    end
+
+    VITE -- "CORS-allowed fetch" --> UVICORN
+    UVICORN --> ENV
+
+    D_FE -- "depends_on" --> D_BE
+
+    SCRIPTS --> VITE
+    SCRIPTS --> UVICORN
+
+    style DEV fill:#1a1a2e,stroke:#c4a882,color:#e8e4df
+    style DOCKER fill:#16213e,stroke:#c4a882,color:#e8e4df
+    style SCRIPTS fill:#1e3a5f,stroke:#c4a882,color:#e8e4df
+```
+
+---
+
+## 9. Complete File Map
+
+```text
+main_file/
+├── backend/
+│   ├── .env                          ← GEMINI_API_KEY (secret)
+│   ├── .env.example                  ← Template for .env
+│   ├── requirements.txt              ← fastapi, uvicorn, google-generativeai, pydantic, python-dotenv
+│   └── app/
+│       ├── main.py                   ← FastAPI app factory + CORS + router mount
+│       ├── core/
+│       │   └── config.py             ← Settings singleton (env vars)
+│       ├── api/
+│       │   ├── router.py             ← Aggregates all route modules
+│       │   └── routes/
+│       │       ├── health.py         ← GET /api/health
+│       │       ├── chat.py           ← POST /api/chat
+│       │       └── design.py         ← GET /state + POST /operations
+│       ├── domain/
+│       │   ├── chat/
+│       │   │   └── models.py         ← ChatRequest, ChatResponse, ChatMessage
+│       │   └── design/
+│       │       └── models.py         ← DiagramDocument, Node, Edge, Operation, etc.
+│       ├── services/
+│       │   ├── chat_service.py       ← Gemini integration + system prompt
+│       │   └── design_service.py     ← Operation validation + application logic
+│       └── repositories/
+│           └── design_repository.py  ← JSON file read/write + default document
+│
+├── frontend/
+│   ├── index.html                    ← 3-panel HTML shell (chat + canvas + settings)
+│   ├── package.json                  ← Vite dev dependency
+│   └── src/
+│       ├── app/
+│       │   └── main.js               ← Bootstrap: setupChat + setupCanvas + setupSettings
+│       ├── features/
+│       │   ├── canvas/
+│       │   │   └── canvas.js         ← Cytoscape graph + all CRUD operations
+│       │   ├── chat/
+│       │   │   └── chat.js           ← AI conversation management
+│       │   └── settings/
+│       │       └── settings.js       ← Grid, snap, styling, export, clear
+│       ├── shared/
+│       │   ├── api/
+│       │   │   └── apiClient.js      ← 4 HTTP functions (health, chat, state, operations)
+│       │   └── utils/
+│       │       └── formatters.js     ← escapeHtml, formatMarkdown, showToast, getTimestamp
+│       └── styles/
+│           └── main.css              ← Dark-mode UI theme
+│
+├── data/
+│   └── project_design.json           ← Canonical design state (backend-owned)
+│
+├── docs/
+│   └── ARCHITECTURE.md               ← Architecture decisions document
+│
+├── scripts/
+│   ├── setup.bat                     ← One-command dependency install
+│   └── start.bat                     ← One-command both-service launch
+│
+├── docker-compose.yml                ← Optional containerized deployment
+├── .gitignore                        ← node_modules, venv, .env, __pycache__
+└── README.md                         ← Project overview + quick start
+```
+
+---
+
+## 10. Summary: End-to-End User Flow
+
+Here's what happens when a user opens the app and starts designing:
+
+```mermaid
+graph TD
+    A["User opens localhost:5173"] --> B["Vite serves index.html"]
+    B --> C["main.js runs on DOMContentLoaded"]
+    C --> D["setupChat() checks /api/health"]
+    C --> E["setupCanvas() calls GET /api/design/state"]
+    C --> F["setupSettings() binds all controls"]
+    
+    D --> G{"Backend healthy?"}
+    G -->|Yes| H["Status: Connected ✅"]
+    G -->|No| I["Status: Offline ⚠️"]
+    
+    E --> J["Cytoscape renders nodes + edges"]
+    
+    J --> K{"User action?"}
+    K -->|"Add/Edit/Delete Node"| L["POST /api/design/operations"]
+    K -->|"Connect Nodes"| L
+    K -->|"Ask AI Question"| M["POST /api/chat"]
+    K -->|"Change Settings"| N["Local Cytoscape style update"]
+    K -->|"Export JSON"| O["Download local file"]
+    
+    L --> P["Backend validates + persists"]
+    P --> Q["Canvas updates locally"]
+    
+    M --> R["Gemini generates response"]
+    R --> S["Chat bubble rendered"]
+
+    style A fill:#1a1a2e,stroke:#c4a882,color:#e8e4df
+    style J fill:#16213e,stroke:#c4a882,color:#e8e4df
+    style P fill:#0f3460,stroke:#c4a882,color:#e8e4df
+    style R fill:#0f3460,stroke:#c4a882,color:#e8e4df
+```
+
+> [!NOTE]
+> **Key architectural insight**: The chat and canvas are currently **independent features**. The AI advises on system design, but the user manually creates the diagram. The planned evolution is to have Gemini generate structured operations that automatically update the canvas—bridging the gap between conversation and visual design.

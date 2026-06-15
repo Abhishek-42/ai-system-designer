@@ -16,37 +16,49 @@
     {
       "id": "n1",
       "data": {
-        "label": "Client",
+        "label": "User",
         "kind": "actor",
         "metadata": {}
       },
       "position": {
-        "x": 180,
-        "y": 220
+        "x": 100.0,
+        "y": 200.0
       }
     },
     {
       "id": "n2",
       "data": {
-        "label": "API service",
+        "label": "Client App",
         "kind": "service",
         "metadata": {}
       },
       "position": {
-        "x": 430,
-        "y": 220
+        "x": 350.0,
+        "y": 200.0
       }
     },
     {
       "id": "n3",
       "data": {
-        "label": "Design store",
+        "label": "Server",
+        "kind": "service",
+        "metadata": {}
+      },
+      "position": {
+        "x": 600.0,
+        "y": 200.0
+      }
+    },
+    {
+      "id": "n4",
+      "data": {
+        "label": "Database",
         "kind": "storage",
         "metadata": {}
       },
       "position": {
-        "x": 680,
-        "y": 220
+        "x": 600.0,
+        "y": 400.0
       }
     }
   ],
@@ -56,7 +68,7 @@
       "source": "n1",
       "target": "n2",
       "data": {
-        "label": null,
+        "label": "User Input",
         "metadata": {}
       }
     },
@@ -65,11 +77,29 @@
       "source": "n2",
       "target": "n3",
       "data": {
-        "label": null,
+        "label": "Encrypted Messages",
+        "metadata": {}
+      }
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "data": {
+        "label": "Data Storage",
+        "metadata": {}
+      }
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n3",
+      "data": {
+        "label": "Data Retrieval",
         "metadata": {}
       }
     }
   ],
-  "version": 1,
-  "updated_at": "2026-05-27T00:00:00"
+  "version": 25,
+  "updated_at": "2026-06-08T15:23:34.252416"
 }

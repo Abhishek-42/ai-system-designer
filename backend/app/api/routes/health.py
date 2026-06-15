@@ -13,6 +13,6 @@ async def health_check():
     return {
         "status": "healthy",
         "service": settings.PROJECT_NAME,
-        "gemini_configured": bool(settings.GEMINI_API_KEY),
+        "groq_configured": bool(settings.GROQ_API_KEY),
         "timestamp": datetime.now().isoformat(),
     }

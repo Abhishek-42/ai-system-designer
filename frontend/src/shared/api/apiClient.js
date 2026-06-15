@@ -20,13 +20,17 @@ export async function checkBackendHealth() {
     }
 }
 
-export async function sendChatMessage(message, history) {
+export async function sendChatMessage(message, history, currentDiagram) {
     const response = await fetch(`${CONFIG.FASTAPI_URL}/api/chat`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message, history })
+        body: JSON.stringify({
+            message,
+            history,
+            current_diagram: currentDiagram || null
+        })
     });
 
     return parseJsonResponse(response, 'Request failed');

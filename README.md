@@ -1,6 +1,6 @@
 # DiagramMaker AI
 
-DiagramMaker AI is an AI-assisted system design workspace for turning project ideas into editable design artifacts. The current foundation combines a Vite frontend, a Cytoscape canvas, and a FastAPI backend with Gemini-powered architecture chat. The product direction is broader than a normal diagram editor: the long-term goal is to support system design diagrams, flowcharts, HLDs, LLDs, service maps, and architecture reasoning from one shared project model.
+DiagramMaker AI is an AI-assisted system design workspace for turning project ideas into editable design artifacts. The current foundation combines a Vite frontend, a Cytoscape canvas, and a FastAPI backend with Groq-powered architecture chat. The product direction is broader than a normal diagram editor: the long-term goal is to support system design diagrams, flowcharts, HLDs, LLDs, service maps, and architecture reasoning from one shared project model.
 
 ## What Changed
 
@@ -9,7 +9,7 @@ The repo has been cleaned up to match the real architecture:
 - Removed old duplicate frontend modules and the unused temporary Django-style frontend.
 - Replaced hardcoded canvas state with a backend-owned design document in `data/project_design.json`.
 - Added validated diagram operations so the app updates design state through safe backend actions instead of relying only on local frontend changes.
-- Refocused the Gemini assistant on system design guidance rather than generic chat responses.
+- Refocused the Groq assistant on system design guidance rather than generic chat responses.
 
 ## Current Architecture
 
@@ -91,15 +91,15 @@ main_file/
 
 ## Quick Start
 
-### 1. Configure Gemini
+### 1. Configure Groq
 
 Create or edit `backend/.env`:
 
 ```bash
-GEMINI_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
 ```
 
-Get a key from [Google AI Studio](https://aistudio.google.com/apikey).
+Get a key from [Groq Console](https://console.groq.com).
 
 ### 2. Install Dependencies
 
@@ -143,5 +143,5 @@ The current repo is now cleaner and safer, but it is still a foundation. The bes
 1. Move the frontend from vanilla JS to React + TypeScript.
 2. Replace the raw JSON document with PostgreSQL-backed project storage.
 3. Expand the project model beyond nodes and edges into HLD/LLD concepts, assumptions, constraints, and views.
-4. Introduce structured Gemini outputs for design planning and future operation generation.
+4. Introduce structured Groq outputs for design planning and future operation generation.
 5. Add retrieval for curated system design knowledge once the core design-state flow is stable.
