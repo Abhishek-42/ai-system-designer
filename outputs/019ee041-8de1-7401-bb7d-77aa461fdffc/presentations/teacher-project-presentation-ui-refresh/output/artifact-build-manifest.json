@@ -1,0 +1,108 @@
+{
+  "output": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\output\\diagrammaker-ai-ui-themed-presentation.pptx",
+  "outputBytes": 64133,
+  "slideCount": 9,
+  "slideSize": {
+    "width": 1280,
+    "height": 720
+  },
+  "previewDir": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview",
+  "previewPaths": [
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-01.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-02.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-03.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-04.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-05.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-06.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-07.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-08.png",
+    "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\slide-09.png"
+  ],
+  "layoutDir": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout",
+  "layoutResults": [
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-01.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-02.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-03.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-04.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-05.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-06.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-07.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-08.layout.json"
+    },
+    {
+      "layoutPath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\layout\\slide-09.layout.json"
+    }
+  ],
+  "contactSheet": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\preview\\contact-sheet.png",
+  "slides": [
+    {
+      "index": 1,
+      "requestedSlideNumber": 1,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-01.mjs",
+      "exportName": "slide01"
+    },
+    {
+      "index": 2,
+      "requestedSlideNumber": 2,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-02.mjs",
+      "exportName": "slide02"
+    },
+    {
+      "index": 3,
+      "requestedSlideNumber": 3,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-03.mjs",
+      "exportName": "slide03"
+    },
+    {
+      "index": 4,
+      "requestedSlideNumber": 4,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-04.mjs",
+      "exportName": "slide04"
+    },
+    {
+      "index": 5,
+      "requestedSlideNumber": 5,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-05.mjs",
+      "exportName": "slide05"
+    },
+    {
+      "index": 6,
+      "requestedSlideNumber": 6,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-06.mjs",
+      "exportName": "slide06"
+    },
+    {
+      "index": 7,
+      "requestedSlideNumber": 7,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-07.mjs",
+      "exportName": "slide07"
+    },
+    {
+      "index": 8,
+      "requestedSlideNumber": 8,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-08.mjs",
+      "exportName": "slide08"
+    },
+    {
+      "index": 9,
+      "requestedSlideNumber": 9,
+      "modulePath": "D:\\Worked\\proj\\B__Professonal__B\\AI-based-Dia-maker\\main_file\\outputs\\019ee041-8de1-7401-bb7d-77aa461fdffc\\presentations\\teacher-project-presentation-ui-refresh\\slides\\slide-09.mjs",
+      "exportName": "slide09"
+    }
+  ]
+}

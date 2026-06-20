@@ -1,0 +1,8 @@
+task mode: create
+primary deck-profile: product-platform
+secondary profile gates: engineering-platform, classroom presentation simplicity
+required proof objects: UI-faithful product framing, platform workflow map, feature-to-workspace linkage, light technology overview, impact and future direction
+source/asset requirements: use only local repo information and local frontend style language
+brand authenticity constraints: use project-owned UI cues only; no third-party logos or invented external brand marks
+profile-specific QA gates: deck must feel modern, product-like, and visually closer to the actual UI while staying readable for a teacher presentation
+known missing inputs: presenter identity details, teacher rubric, institution branding

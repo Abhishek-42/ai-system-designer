@@ -1,0 +1,14 @@
+thesis: DiagramMaker AI helps users move from idea to understandable diagram faster, and the redesigned deck now reflects the actual product UI more clearly.
+audience: teacher and classroom reviewers
+one-line arc: project identity -> problem -> solution -> workspace features -> light tech -> workflow -> benefits -> future scope -> conclusion
+
+slide list:
+1. Cover claim: The presentation now looks like the product it represents.
+2. Problem claim: Diagram creation remains confusing and communication-heavy for beginners.
+3. Solution claim: The project combines guidance, editing, and structured saving in one flow.
+4. Features claim: The main features are strongest when shown through the workspace itself.
+5. Tech claim: The stack is simple and practical, not overloaded.
+6. Workflow claim: The product can be understood as a four-step guided cycle.
+7. Impact claim: The platform helps users learn and present more confidently.
+8. Future claim: The prototype can evolve into a broader AI-assisted design platform.
+9. Closing claim: Better product-aligned visuals make the project easier to present effectively.

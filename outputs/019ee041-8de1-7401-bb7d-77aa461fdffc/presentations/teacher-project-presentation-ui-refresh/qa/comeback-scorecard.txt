@@ -1,0 +1,17 @@
+story: pending
+specificity: pending
+rhythm: pending
+whitespace: pending
+chart clarity: n/a
+typography: pending
+restraint: pending
+precision: pending
+coherence: pending
+reference delta: n/a
+
+primary deck-profile: product-platform
+profile gate pass/fail: pending
+tool/runtime caveats: pending
+package checks: pending
+render checks: pending
+accepted warnings or tradeoffs: pending

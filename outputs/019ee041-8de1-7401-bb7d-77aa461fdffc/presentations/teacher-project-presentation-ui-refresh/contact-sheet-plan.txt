@@ -1,0 +1,16 @@
+planned slide count: 9
+layout families:
+- cover split with live UI mock
+- narrative left plus stacked right-side problem panels
+- full-width staged solution container
+- workspace demo with feature callout rail
+- layered technology stack
+- horizontal workflow rail
+- dual-panel impact layout with supporting metric pills
+- roadmap timeline
+- closing split with UI mock and recap panel
+
+hard-gate check:
+- no three consecutive card-grid slides
+- no bright light-theme fallback
+- the deck must read as one authored visual system at thumbnail size

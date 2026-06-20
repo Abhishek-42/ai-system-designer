@@ -1,0 +1,15 @@
+slide size: 1280x720
+background system: deep black workspace frame with soft panel layering and low-contrast grid lines
+typography pair: Aptos Display for titles, Aptos for body, Aptos Mono for UI labels and deck chrome
+color palette: black-pure, black-deep, black-soft, muted gold, gold-dim, steel, ember, text-primary, text-body, text-muted
+chart grammar: no traditional charts; proof objects are product panels, workflow rails, stack layers, and milestone maps
+diagram grammar: rectangular UI panels, process rails, compact tags, app-shell mockups, and timeline dots
+connector grammar: use simple rails and aligned sequencing, not decorative arrows
+container grammar: dark rectangular panels with hairline borders and muted accent strips
+source/footer grammar: low-contrast monospace footer; top chrome label references the workspace
+page marker grammar: section identity handled through chrome label and kicker
+title/kicker grammar: thin gold marker + monospace label + bold modern title
+data-label grammar: compact tags and metric pills
+brand asset policy: use product-owned visual cues only; no external logos
+allowed layout families: cover split with UI mock, left-copy/right-stack problem, full-width staged solution, workspace demo with right rail, layered tech stack, workflow rail, dual impact panels, roadmap timeline, closing split layout
+banned motifs: bright template colors, generic rounded business cards, crowded bullet slides, fake corporate icons, off-brand light themes

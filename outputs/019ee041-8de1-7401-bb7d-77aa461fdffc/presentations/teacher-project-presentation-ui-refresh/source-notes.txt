@@ -1,0 +1,14 @@
+Primary sources used:
+- README.md
+- docs/ARCHITECTURE.md
+- frontend/src/styles/variables.css
+- frontend/src/styles/main.css
+- frontend/src/styles/layout.css
+- frontend/src/styles/canvas.css
+- frontend/src/styles/chat.css
+- frontend/src/styles/settings.css
+
+Design provenance:
+- Dark slide palette derived from the product's black, gold, and muted text system.
+- Panel structure derived from the product's chat panel, center canvas, toolbar, and settings panel layout.
+- UI mockups are abstract recreations based on local project source, not invented third-party screens.
