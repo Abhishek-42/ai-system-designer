@@ -14,6 +14,14 @@ call venv\Scripts\python -m pip install -r requirements.txt
 if not exist .env (
     echo Creating .env file from template...
     copy .env.example .env
+) else (
+    findstr /C:"GROQ_API_KEY" .env >nul
+    if errorlevel 1 (
+        echo Updating existing .env with GROQ_API_KEY...
+        echo.>> .env
+        echo # Added by setup.bat >> .env
+        echo GROQ_API_KEY=your_groq_api_key_here >> .env
+    )
 )
 cd ..
 
