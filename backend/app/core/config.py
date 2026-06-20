@@ -1,8 +1,12 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Construct the absolute path to backend/.env
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+env_path = os.path.join(backend_dir, ".env")
+
+# Load environment variables from .env file explicitly
+load_dotenv(dotenv_path=env_path)
 
 class Settings:
     PROJECT_NAME: str = "DiagramMaker AI Service"

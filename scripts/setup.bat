@@ -2,9 +2,19 @@
 echo Starting DiagramMaker Setup...
 
 echo.
-echo Installing Backend Dependencies...
+echo Setting up Backend Environment...
 cd backend
-python -m pip install -r requirements.txt
+if not exist venv (
+    echo Creating virtual environment...
+    python -m venv venv
+)
+echo Installing Backend Dependencies...
+call venv\Scripts\python -m pip install -r requirements.txt
+
+if not exist .env (
+    echo Creating .env file from template...
+    copy .env.example .env
+)
 cd ..
 
 echo.
@@ -15,5 +25,5 @@ cd ..
 
 echo.
 echo Setup Complete!
-echo Next steps: Add your GEMINI_API_KEY to backend/.env and run scripts\start.bat
+echo Next steps: Add your GROQ_API_KEY to backend\.env and run scripts\start.bat
 pause
